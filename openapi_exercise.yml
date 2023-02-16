@@ -1,0 +1,122 @@
+openapi: "3.0.2"
+info:
+  title: API Title
+  version: "1.0"
+servers:
+  - url: https://api.server.test/v1
+  - url: https://dev.server.test/v2
+    description: Dev
+paths:
+  /what-time-is-it:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DateTime"
+  /students:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+                  students:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/StudentWithId"
+  /students/{studentId}:
+    get:
+      parameters:
+        - name: studentId
+          in: path
+          description: "Student ID"
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentWithId"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /student:
+    post:
+      security:
+        - apiKey: []
+      requestBody:
+        description: "Created Student object"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Student"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentWithId"
+
+components:
+  schemas:
+    DateTime:
+      type: object
+      properties:
+        day:
+          type: integer
+          example: 1
+        month:
+          type: string
+          example: "January"
+        year:
+          type: integer
+          example: 2001
+    Student:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Piti"
+        year:
+          type: integer
+          example: 65
+      required:
+        - name
+        - year
+    Error:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: "Something went wrong."
+    StudentWithId:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+        - $ref: "#/components/schemas/Student"
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      name: X-API-KEY
+      in: header
